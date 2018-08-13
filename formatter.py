@@ -1,10 +1,11 @@
 from os import listdir,rename
 import re
+from platform import system as os_system
 
 def format_image(image_name):
     """ Function formatting the image name """
     img = r"%s" %image_name
-    formatted_img = img.replace('&','and')
+    formatted_img = img.replace('&','_and_')
     formatted_img = re.sub('[^a-zA-Z0-9.]+','_', formatted_img, flags = re.IGNORECASE)
     return formatted_img
 
@@ -26,21 +27,35 @@ def populate_res(img_number, filename):
 if __name__ == "__main__":
     while True:
         current_dir = raw_input("Type the directory where the images are to be formatted, or . for current directory: ")
-        dir_contents = os.listdir(current_dir)
+        dir_contents = listdir(current_dir)
         print dir_contents
+
+        # Checking ths OS  -> windows uses the inverted dash
+        dash = "/"
+        if os_system().lower() == "windows":
+            dash = "\\"
         
         all_images = []
         formatted_images = []
         
         for item in dir_contents:
-            all_images.append(image_capturer(item))
+            if image_capturer(item):
+                all_images.append(image_capturer(item))
         
         for x in all_images:
             formatted_images.append(format_image(x))
+
+        print all_images
+        print "\n".join(formatted_images)
+        continue_checker = raw_input("This is how the images will be renamed. Do you want to proceed? 1 = yes; 0 = no: ")
+        
+        #Checking if the images will be renamed 
+        if not eval(continue_checker):
+            break
         
         # Renaming the files
         for i,e in enumerate(all_images):
-            rename(e, formatted_images[i])
+            rename(current_dir + dash + e, current_dir + dash + formatted_images[i])
 
         # preparing the res tags and exporting the file 
         export_res = raw_input("Do you want to export a file with the images placed in resources? 1=yes, 0=no :")
